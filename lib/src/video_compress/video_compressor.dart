@@ -51,10 +51,14 @@ extension Compress on IVideoCompress {
   /// getByteThumbnail return [Future<Uint8List>],
   /// quality can be controlled by [quality] from 1 to 100,
   /// select the position unit in the video by [position] is milliseconds
+  ///
+  /// [maxWidth] and [maxHeight] is 0 , means original size
   Future<Uint8List?> getByteThumbnail(
     String path, {
     int quality = 100,
     int position = -1,
+    int maxWidth = 0,
+    int maxHeight = 0,
   }) async {
     assert(quality > 1 || quality < 100);
 
@@ -62,16 +66,23 @@ extension Compress on IVideoCompress {
       'path': path,
       'quality': quality,
       'position': position,
+      'maxWidth': maxWidth,
+      'maxHeight': maxHeight,
     });
   }
 
   /// getFileThumbnail return [Future<File>]
   /// quality can be controlled by [quality] from 1 to 100,
   /// select the position unit in the video by [position] is milliseconds
+  ///
+  /// [maxWidth] and [maxHeight] is 0 , means original size
   Future<File> getFileThumbnail(
     String path, {
     int quality = 100,
     int position = -1,
+    int maxWidth = 0,
+    int maxHeight = 0,
+    String? thumbnailPath,
   }) async {
     assert(quality > 1 || quality < 100);
 
@@ -81,9 +92,16 @@ extension Compress on IVideoCompress {
       'path': path,
       'quality': quality,
       'position': position,
+      'maxWidth': maxWidth,
+      'maxHeight': maxHeight,
+      'thumbnailPath': thumbnailPath,
     }));
 
-    final file = File(Uri.decodeFull(filePath!));
+    if (filePath == null) {
+      throw Exception('filePath is null');
+    }
+
+    final file = File(Uri.decodeFull(filePath));
 
     return file;
   }

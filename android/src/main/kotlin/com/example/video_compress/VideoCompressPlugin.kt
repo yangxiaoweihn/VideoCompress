@@ -49,14 +49,20 @@ class VideoCompressPlugin : MethodCallHandler, FlutterPlugin {
                 val path = call.argument<String>("path")
                 val quality = call.argument<Int>("quality")!!
                 val position = call.argument<Int>("position")!! // to long
-                ThumbnailUtility(channelName).getByteThumbnail(path!!, quality, position.toLong(), result)
+                val maxWidth = call.argument<Int>("maxWidth")!!
+                val maxHeight = call.argument<Int>("maxHeight")!!
+                ThumbnailUtility(channelName).getByteThumbnail(path!!, quality,
+                    position.toLong(), maxWidth, maxHeight, result)
             }
             "getFileThumbnail" -> {
                 val path = call.argument<String>("path")
                 val quality = call.argument<Int>("quality")!!
                 val position = call.argument<Int>("position")!! // to long
+                val maxWidth = call.argument<Int>("maxWidth")!!
+                val maxHeight = call.argument<Int>("maxHeight")!!
+                val thumbnailPath = call.argument<String>("thumbnailPath")
                 ThumbnailUtility("video_compress").getFileThumbnail(context, path!!, quality,
-                        position.toLong(), result)
+                        position.toLong(), maxWidth, maxHeight, thumbnailPath, result)
             }
             "getMediaInfo" -> {
                 val path = call.argument<String>("path")

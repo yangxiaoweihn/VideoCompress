@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONObject
 import java.io.File
@@ -76,7 +77,7 @@ class Utility(private val channelName: String) {
         return json
     }
 
-    fun getBitmap(path: String, position: Long, result: MethodChannel.Result): Bitmap {
+    fun getBitmap(path: String, position: Long, maxWidth: Int, maxHeight: Int, result: MethodChannel.Result): Bitmap {
         var bitmap: Bitmap? = null
         val retriever = MediaMetadataRetriever()
 
@@ -95,17 +96,35 @@ class Utility(private val channelName: String) {
             }
         }
 
-        if (bitmap == null) result.success(emptyArray<Int>())
+        if (bitmap == null) result.error(channelName, "Assume this is a corrupt video file", null)
 
         val width = bitmap!!.width
         val height = bitmap.height
-        val max = Math.max(width, height)
-        if (max > 512) {
-            val scale = 512f / max
-            val w = Math.round(scale * width)
-            val h = Math.round(scale * height)
-            bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true)
+        var targetWidth = maxWidth
+        var targetHeight = maxHeight
+        if (targetWidth != 0 || targetHeight != 0) {
+            if (targetHeight != 0 && targetWidth != 0) {
+                bitmap = Bitmap.createScaledBitmap(bitmap, targetHeight, targetWidth, true)
+                Log.d(channelName, String.format("original w:%d, h:%d => %d, %d", width, height, targetWidth, targetHeight))
+            } else {
+                if (targetWidth == 0) {
+                    targetWidth = Math.round((targetHeight.toFloat() / height) * width)
+                }
+                if (targetHeight == 0) {
+                    targetHeight = Math.round((targetWidth.toFloat() / width) * height)
+                }
+                bitmap = Bitmap.createScaledBitmap(bitmap, targetHeight, targetWidth, true)
+                Log.d(channelName, String.format("original w:%d, h:%d => %d, %d", width, height, targetWidth, targetHeight))
+            }
         }
+
+//        val max = Math.max(width, height)
+//        if (max > 512) {
+//            val scale = 512f / max
+//            val w = Math.round(scale * width)
+//            val h = Math.round(scale * height)
+//            bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true)
+//        }
 
         return bitmap!!
     }
